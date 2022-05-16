@@ -17,7 +17,7 @@ type Deployer interface {
 	Deploy(context.Context, models.Application) error
 }
 
-func NewDeployer(k8s *kubernetes.Clientset, namespace string, cfg Config) Deployer {
+func NewDeployer(k8s kubernetes.Interface, namespace string, cfg Config) Deployer {
 	return &namespacedDeployer{
 		namespace: namespace,
 
