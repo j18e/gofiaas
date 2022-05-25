@@ -2,11 +2,13 @@ package deploying
 
 import (
 	"context"
+	"strconv"
+
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/j18e/gofiaas/pkg/models"
-	"github.com/j18e/gofiaas/pkg/validating"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 type Config struct {
@@ -14,24 +16,27 @@ type Config struct {
 }
 
 type Deployer interface {
-	Deploy(context.Context, models.Application) error
+	Deploy(context.Context, models.InternalSpec) error
+	Delete(context.Context, models.InternalSpec) error
 }
 
-func NewDeployer(k8s kubernetes.Interface, namespace string, cfg Config) Deployer {
+func NewDeployer(k8s kubernetes.Interface, factory informers.SharedInformerFactory, namespace string, cfg Config) Deployer {
 	return &namespacedDeployer{
 		namespace: namespace,
 
 		deployments:              newDeploymentDeployer(k8s, namespace),
 		horizontalPodAutoscalers: newHorizontalPodAutoscalerDeployer(k8s, namespace),
 		ingresses:                newIngressDeployer(k8s, namespace),
-		serviceAccounts:          newServiceAccountDeployer(k8s, namespace),
-		services:                 newServiceDeployer(k8s, namespace, cfg.ServiceType),
+		serviceAccounts: newServiceAccountDeployer(
+			k8s.CoreV1().ServiceAccounts(namespace),
+			factory.Core().V1().ServiceAccounts().Lister().ServiceAccounts(namespace),
+		),
+		services: newServiceDeployer(k8s, namespace, cfg.ServiceType),
 	}
 }
 
 type namespacedDeployer struct {
 	namespace string
-	validating.Validator
 
 	deployments              *deploymentDeployer
 	horizontalPodAutoscalers *horizontalPodAutoscalerDeployer
@@ -40,17 +45,18 @@ type namespacedDeployer struct {
 	services                 *serviceDeployer
 }
 
-func (d *namespacedDeployer) Deploy(ctx context.Context, app models.Application) error {
+func (d *namespacedDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
 	return nil
 }
 
-func mergeDicts(base, overrides map[string]string) map[string]string {
-	res := make(map[string]string)
-	for k, v := range base {
-		res[k] = v
+func (d *namespacedDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+	return nil
+}
+
+func (d *namespacedDeployer) makeLabels(spec models.InternalSpec) map[string]string {
+	return map[string]string{
+		"app":                 spec.Name,
+		"fiaas/version":       strconv.Itoa(spec.Version),
+		"fiaas/deployment_id": spec.DeploymentID,
 	}
-	for k, v := range overrides {
-		res[k] = v
-	}
-	return res
 }
