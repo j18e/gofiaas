@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	clientappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 
-	"github.com/j18e/gofiaas/pkg/models"
+	"github.com/j18e/gofiaas/models"
 )
 
 type deploymentDeployer struct {

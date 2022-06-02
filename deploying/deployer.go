@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/j18e/gofiaas/pkg/models"
+	"github.com/j18e/gofiaas/models"
 )
 
 type Config struct {

@@ -3,7 +3,7 @@ package deploying
 import (
 	"context"
 
-	"github.com/j18e/gofiaas/pkg/models"
+	"github.com/j18e/gofiaas/models"
 	"k8s.io/client-go/kubernetes"
 	clientautoscalingv1 "k8s.io/client-go/kubernetes/typed/autoscaling/v1"
 )

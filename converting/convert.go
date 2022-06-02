@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	fiaasv1 "github.com/fiaas/fiaas-go-client/pkg/apis/fiaas.schibsted.io/v1"
-	"github.com/j18e/gofiaas/pkg/models"
+	"github.com/j18e/gofiaas/models"
 )
 
 const LabelDeploymentID = "fiaas/deployment_id"

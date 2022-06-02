@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/j18e/gofiaas/pkg/deploying"
-	"github.com/j18e/gofiaas/pkg/models"
+	"github.com/j18e/gofiaas/deploying"
+	"github.com/j18e/gofiaas/models"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
