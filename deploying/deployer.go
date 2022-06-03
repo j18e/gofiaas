@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/j18e/gofiaas/log"
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 )
 
 const DefaultSecretsDir = "/var/run/secrets/fiaas"
@@ -29,8 +29,8 @@ type Config struct {
 
 type ResourceDeployer interface {
 	fmt.Stringer
-	Deploy(context.Context, models.InternalSpec) error
-	Delete(context.Context, models.InternalSpec) error
+	Deploy(context.Context, core.Spec) error
+	Delete(context.Context, core.Spec) error
 }
 
 func NewDeployer(k8s kubernetes.Interface, factory informers.SharedInformerFactory, namespace string, cfg Config) *Deployer {
@@ -58,7 +58,7 @@ type Deployer struct {
 	deployers []ResourceDeployer
 }
 
-func (d *Deployer) Deploy(ctx context.Context, spec models.InternalSpec) {
+func (d *Deployer) Deploy(ctx context.Context, spec core.Spec) {
 	for _, dep := range d.deployers {
 		if err := dep.Deploy(ctx, spec); err != nil {
 			log.Logger.Warnf("Error calling deploy on %s: %v", dep, err)
@@ -66,7 +66,7 @@ func (d *Deployer) Deploy(ctx context.Context, spec models.InternalSpec) {
 	}
 }
 
-func (d *Deployer) Delete(ctx context.Context, spec models.InternalSpec) {
+func (d *Deployer) Delete(ctx context.Context, spec core.Spec) {
 	for _, dep := range d.deployers {
 		if err := dep.Delete(ctx, spec); err != nil {
 			log.Logger.Warnf("Error calling deploy on %s: %v", dep, err)
@@ -74,7 +74,7 @@ func (d *Deployer) Delete(ctx context.Context, spec models.InternalSpec) {
 	}
 }
 
-func (d *Deployer) makeLabels(spec models.InternalSpec) map[string]string {
+func (d *Deployer) makeLabels(spec core.Spec) map[string]string {
 	return map[string]string{
 		"app":                 spec.Name,
 		"fiaas/version":       strconv.Itoa(spec.Version),

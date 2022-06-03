@@ -3,7 +3,7 @@ package deploying
 import (
 	"context"
 
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 	corev1 "k8s.io/api/core/v1"
 	clientcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -24,10 +24,10 @@ func (d *serviceDeployer) String() string {
 	return "service-deployer"
 }
 
-func (d *serviceDeployer) Deploy(ctx context.Context, app models.InternalSpec) error {
+func (d *serviceDeployer) Deploy(ctx context.Context, app core.Spec) error {
 	return nil
 }
 
-func (d *serviceDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+func (d *serviceDeployer) Delete(ctx context.Context, spec core.Spec) error {
 	return nil
 }

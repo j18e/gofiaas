@@ -1,20 +1,33 @@
-package spec
+package core
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	fiaasv1 "github.com/fiaas/fiaas-go-client/pkg/apis/fiaas.schibsted.io/v1"
+	corev1 "k8s.io/api/core/v1"
+)
 
-type ApplicationConfig struct {
-	Version              uint                        `json:"version"`
-	Replicas             ReplicaConfig               `json:"replicas"`
-	Ingress              []IngressHost               `json:"ingress"`
-	Healthchecks         HealthchecksConfig          `json:"healthchecks"`
-	Resources            corev1.ResourceRequirements `json:"resources"`
-	Metrics              MetricsConfig               `json:"metrics"`
-	Ports                PortsConfig                 `json:"ports"`
-	SecretsInEnvironment bool                        `json:"secrets_in_environment"`
-	AdminAccess          bool                        `json:"admin_access"`
+type Spec struct {
+	UID          string // used in owner references in created resources
+	Name         string
+	Image        string
+	DeploymentID string
+
+	Annotations fiaasv1.AdditionalLabelsOrAnnotations
+	Labels      fiaasv1.AdditionalLabelsOrAnnotations
+
+	// Fields from Application.Spec.Config
+	Version              int
+	Replicas             ReplicasConfig
+	Ingress              []IngressHost
+	Healthchecks         HealthchecksConfig
+	Resources            corev1.ResourceRequirements
+	Metrics              MetricsConfig
+	Ports                []PortConfig
+	SecretsInEnvironment bool
+	AdminAccess          bool
+	// TODO Extensions
 }
 
-type ReplicaConfig struct {
+type ReplicasConfig struct {
 	Minimum                uint `json:"minimum"`
 	Maximum                uint `json:"maximum"`
 	CPUThresholdPercentage uint `json:"cpu_threshold_percentage"`
@@ -77,8 +90,6 @@ type DatadogConfig struct {
 	Enabled bool              `json:"enabled"`
 	Tags    map[string]string `json:"tags"`
 }
-
-type PortsConfig []PortConfig
 
 type PortConfig struct {
 	Protocol   string `json:"protocol"`

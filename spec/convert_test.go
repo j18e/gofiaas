@@ -1,4 +1,4 @@
-package converting
+package spec
 
 import (
 	"testing"

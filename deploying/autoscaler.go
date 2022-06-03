@@ -3,8 +3,9 @@ package deploying
 import (
 	"context"
 
-	"github.com/j18e/gofiaas/models"
 	clientautoscalingv1 "k8s.io/client-go/kubernetes/typed/autoscaling/v1"
+
+	core "github.com/j18e/gofiaas/spec/core"
 )
 
 type autoscalerDeployer struct {
@@ -21,10 +22,10 @@ func (d *autoscalerDeployer) String() string {
 	return "autoscaler-deployer"
 }
 
-func (d *autoscalerDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
+func (d *autoscalerDeployer) Deploy(ctx context.Context, spec core.Spec) error {
 	return nil
 }
 
-func (d *autoscalerDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+func (d *autoscalerDeployer) Delete(ctx context.Context, spec core.Spec) error {
 	return nil
 }

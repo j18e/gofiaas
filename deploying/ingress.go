@@ -4,8 +4,9 @@ import (
 	"context"
 	"regexp"
 
-	"github.com/j18e/gofiaas/models"
 	clientnetworkingv1 "k8s.io/client-go/kubernetes/typed/networking/v1"
+
+	"github.com/j18e/gofiaas/spec/core"
 )
 
 type ingressDeployerConfig struct {
@@ -29,10 +30,10 @@ func (d *ingressDeployer) String() string {
 	return "ingress-deployer"
 }
 
-func (d *ingressDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
+func (d *ingressDeployer) Deploy(ctx context.Context, spec core.Spec) error {
 	return nil
 }
 
-func (d *ingressDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+func (d *ingressDeployer) Delete(ctx context.Context, spec core.Spec) error {
 	return nil
 }

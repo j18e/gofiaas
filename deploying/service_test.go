@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,18 +64,18 @@ func Test_serviceDeployer_deploy(t *testing.T) {
 
 func Test_serviceDeployer_shouldHaveService(t *testing.T) {
 	sd := serviceDeployer{}
-	app := models.Application{}
-	got := sd.shouldHaveService(app)
+	spec := core.Spec{}
+	got := sd.shouldHaveService(spec)
 	assert.Equal(t, false, got, "application without any ports should not have service")
 
-	app.Spec.Config.Ports = append(app.Spec.Config.Ports, models.PortConfig{})
-	got = sd.shouldHaveService(app)
+	spec.Ports = append(spec.Ports, core.PortConfig{})
+	got = sd.shouldHaveService(spec)
 	assert.Equal(t, true, got, "application without 1+ ports should have service")
 }
 
 func Test_serviceDeployer_tcpPortAnnotations(t *testing.T) {
 	exp := map[string]string{"fiaas/tcp_port_names": "one,two"}
-	ports := models.PortsConfig{
+	ports := []core.PortConfig{
 		{
 			Name:     "http",
 			Protocol: "http",
@@ -98,7 +98,7 @@ func Test_serviceDeployer_tcpPortAnnotations(t *testing.T) {
 }
 
 func Test_serviceDeployer_makePorts(t *testing.T) {
-	ports := models.PortsConfig{{
+	ports := []core.PortConfig{
 		Name:       "http",
 		Protocol:   "http",
 		Port:       80,

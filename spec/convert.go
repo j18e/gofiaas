@@ -1,11 +1,13 @@
-package converting
+package spec
 
 import (
 	"fmt"
 	"regexp"
 
 	fiaasv1 "github.com/fiaas/fiaas-go-client/pkg/apis/fiaas.schibsted.io/v1"
-	"github.com/j18e/gofiaas/models"
+	corev1 "k8s.io/api/core/v1"
+
+	"github.com/j18e/gofiaas/spec/core"
 )
 
 const LabelDeploymentID = "fiaas/deployment_id"
@@ -14,7 +16,7 @@ var reContainerImage = regexp.MustCompile(`[\w-.]+/[\w-]+/[\w-]+:[\w-.]+`)
 
 // We use an interface so that reContainerImage will get initialized on startup.
 type Converter interface {
-	Convert(*fiaasv1.Application) (*models.InternalSpec, error)
+	Convert(*fiaasv1.Application) (*core.Spec, error)
 }
 
 func NewConverter() Converter {
@@ -23,7 +25,7 @@ func NewConverter() Converter {
 
 type converter struct{}
 
-func (c *converter) Convert(app *fiaasv1.Application) (*models.InternalSpec, error) {
+func (c *converter) Convert(app *fiaasv1.Application) (*core.Spec, error) {
 	initMaps(app)
 	if app.Name != app.Spec.Application {
 		return nil, fmt.Errorf("Name does not match Spec.Name")
@@ -38,7 +40,7 @@ func (c *converter) Convert(app *fiaasv1.Application) (*models.InternalSpec, err
 		return nil, fmt.Errorf("Spec.image does not match regex %s", reContainerImage)
 	}
 
-	spec := &models.InternalSpec{
+	spec := &core.Spec{
 		Labels:      *app.Spec.AdditionalLabels,
 		Annotations: *app.Spec.AdditionalAnnotations,
 	}
@@ -49,17 +51,17 @@ func (c *converter) Convert(app *fiaasv1.Application) (*models.InternalSpec, err
 		case "version":
 			spec.Version, ok = val.(int)
 		case "replicas":
-			spec.Replicas, ok = val.(models.ReplicaConfig)
+			spec.Replicas, ok = val.(core.ReplicasConfig)
 		case "ingress":
-			spec.Ingress, ok = val.(models.IngressConfig)
+			spec.Ingress, ok = val.([]core.IngressHost)
 		case "healthchecks":
-			spec.Healthchecks, ok = val.(models.HealthchecksConfig)
+			spec.Healthchecks, ok = val.(core.HealthchecksConfig)
 		case "resources":
-			spec.Resources, ok = val.(models.ResourcesConfig)
+			spec.Resources, ok = val.(corev1.ResourceRequirements)
 		case "metrics":
-			spec.Metrics, ok = val.(models.MetricsConfig)
+			spec.Metrics, ok = val.(core.MetricsConfig)
 		case "ports":
-			spec.Ports, ok = val.(models.PortsConfig)
+			spec.Ports, ok = val.([]core.PortConfig)
 		case "secrets_in_environment":
 			spec.SecretsInEnvironment, ok = val.(bool)
 		case "admin_access":

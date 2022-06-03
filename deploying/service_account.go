@@ -3,7 +3,7 @@ package deploying
 import (
 	"context"
 
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -26,11 +26,11 @@ func (d *serviceAccountDeployer) String() string {
 	return "service-account-deployer"
 }
 
-func (d *serviceAccountDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
+func (d *serviceAccountDeployer) Deploy(ctx context.Context, spec core.Spec) error {
 	return nil
 }
 
-func (d *serviceAccountDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+func (d *serviceAccountDeployer) Delete(ctx context.Context, spec core.Spec) error {
 	err := d.serviceAccounts.Delete(ctx, spec.Name, metav1.DeleteOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil

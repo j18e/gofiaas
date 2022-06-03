@@ -3,23 +3,23 @@ package deploying
 import (
 	"testing"
 
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/uuid"
 )
 
 func Test_ownerReferences(t *testing.T) {
 	name := "app-1"
-	var app models.Application
-	app.Name = name
+	spec := core.Spec{Name: name}
 
 	// test app with no UID returns empty list
-	got := ownerReferences(app)
+	got := ownerReferences(spec)
 	assert.Empty(t, got, "passing in application with no UID: expected empty list")
 
 	uid := uuid.NewUUID()
-	app.UID = uid
+	spec.UID = types.UID(uid)
 	exp := []metav1.OwnerReference{
 		{
 			APIVersion:         "fiaas.schibsted.io/v1",
@@ -30,5 +30,5 @@ func Test_ownerReferences(t *testing.T) {
 			BlockOwnerDeletion: boolPtr(true),
 		},
 	}
-	assert.Equal(t, exp, ownerReferences(app))
+	assert.Equal(t, exp, ownerReferences(spec))
 }

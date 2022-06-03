@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 
-	"github.com/j18e/gofiaas/models"
+	"github.com/j18e/gofiaas/spec/core"
 )
 
 type deploymentDeployer struct {
@@ -29,11 +29,11 @@ func (d *deploymentDeployer) String() string {
 	return "deployment-deployer"
 }
 
-func (d *deploymentDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
+func (d *deploymentDeployer) Deploy(ctx context.Context, spec core.Spec) error {
 	return nil
 }
 
-func (d *deploymentDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
+func (d *deploymentDeployer) Delete(ctx context.Context, spec core.Spec) error {
 	err := d.deployments.Delete(ctx, spec.Name, metav1.DeleteOptions{})
 	if apierrors.IsNotFound(err) {
 		return nil
@@ -44,7 +44,7 @@ func (d *deploymentDeployer) Delete(ctx context.Context, spec models.InternalSpe
 	return nil
 }
 
-func (d *deploymentDeployer) applyPrometheusAnnotations(dep *appsv1.Deployment, pc models.PrometheusConfig) {
+func (d *deploymentDeployer) applyPrometheusAnnotations(dep *appsv1.Deployment, pc core.PrometheusConfig) {
 	if !pc.Enabled {
 		return
 	}
