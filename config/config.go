@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/j18e/gofiaas/deploying"
+	"github.com/j18e/gofiaas/deploy"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -21,7 +21,7 @@ type FlagSet struct {
 	environment string
 	webPort     int
 
-	Deployer deploying.Config
+	Deployer deploy.Config
 }
 
 func ParseFlags() (*FlagSet, error) {
@@ -68,8 +68,8 @@ func globalEnvVarsFn(envVars map[string]string) func(string) error {
 		if len(kvPair) != 2 {
 			return fmt.Errorf("parsing app.global-env %s: required format key=val", s)
 		}
-		if !deploying.ReEnvVar.MatchString(kvPair[0]) {
-			return fmt.Errorf("parsing app.global-env %s: variable name must match regex %s", s, deploying.ReEnvVar)
+		if !deploy.ReEnvVar.MatchString(kvPair[0]) {
+			return fmt.Errorf("parsing app.global-env %s: variable name must match regex %s", s, deploy.ReEnvVar)
 		}
 		envVars[kvPair[0]] = kvPair[1]
 		return nil

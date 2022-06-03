@@ -1,4 +1,4 @@
-package deploying
+package deploy
 
 import (
 	"testing"
