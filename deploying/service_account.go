@@ -11,7 +11,6 @@ import (
 )
 
 type serviceAccountDeployer struct {
-	namespace       string
 	serviceAccounts clientcorev1.ServiceAccountInterface
 	lister          listerscorev1.ServiceAccountNamespaceLister
 }
@@ -21,6 +20,10 @@ func newServiceAccountDeployer(serviceAccounts clientcorev1.ServiceAccountInterf
 		serviceAccounts: serviceAccounts,
 		lister:          lister,
 	}
+}
+
+func (d *serviceAccountDeployer) String() string {
+	return "service-account-deployer"
 }
 
 func (d *serviceAccountDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {

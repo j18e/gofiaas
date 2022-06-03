@@ -1,11 +1,11 @@
-package models
+package spec
 
 import corev1 "k8s.io/api/core/v1"
 
 type ApplicationConfig struct {
 	Version              uint                        `json:"version"`
 	Replicas             ReplicaConfig               `json:"replicas"`
-	Ingress              IngressConfig               `json:"ingress"`
+	Ingress              []IngressHost               `json:"ingress"`
 	Healthchecks         HealthchecksConfig          `json:"healthchecks"`
 	Resources            corev1.ResourceRequirements `json:"resources"`
 	Metrics              MetricsConfig               `json:"metrics"`
@@ -21,15 +21,11 @@ type ReplicaConfig struct {
 	Singleton              bool `json:"singleton"`
 }
 
-type IngressConfig []IngressHost
-
 type IngressHost struct {
 	Host        string            `json:"host"`
-	Paths       IngressPaths      `json:"paths"`
+	Paths       []IngressPath     `json:"paths"`
 	Annotations map[string]string `json:"annotations"`
 }
-
-type IngressPaths []IngressPath
 
 type IngressPath struct {
 	Path string `json:"path"`

@@ -1,10 +1,10 @@
-package models
+package v3
 
 import corev1 "k8s.io/api/core/v1"
 
-type ApplicationConfig struct {
+type ApplicationSpec struct {
 	Version              uint                        `json:"version"`
-	Replicas             ReplicaConfig               `json:"replicas"`
+	Replicas             ReplicasConfig              `json:"replicas"`
 	Ingress              IngressConfig               `json:"ingress"`
 	Healthchecks         HealthchecksConfig          `json:"healthchecks"`
 	Resources            corev1.ResourceRequirements `json:"resources"`
@@ -14,7 +14,7 @@ type ApplicationConfig struct {
 	AdminAccess          bool                        `json:"admin_access"`
 }
 
-type ReplicaConfig struct {
+type ReplicasConfig struct {
 	Minimum                uint `json:"minimum"`
 	Maximum                uint `json:"maximum"`
 	CPUThresholdPercentage uint `json:"cpu_threshold_percentage"`

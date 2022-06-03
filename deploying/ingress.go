@@ -2,24 +2,37 @@ package deploying
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/j18e/gofiaas/models"
-	"k8s.io/client-go/kubernetes"
 	clientnetworkingv1 "k8s.io/client-go/kubernetes/typed/networking/v1"
 )
 
-type ingressDeployer struct {
-	namespace string
-	ingresses clientnetworkingv1.IngressInterface
+type ingressDeployerConfig struct {
+	suffixes         []string
+	hostRewriteRules map[*regexp.Regexp]string
 }
 
-func newIngressDeployer(k8s kubernetes.Interface, namespace string) *ingressDeployer {
+type ingressDeployer struct {
+	ingresses clientnetworkingv1.IngressInterface
+	ingressDeployerConfig
+}
+
+func newIngressDeployer(ingresses clientnetworkingv1.IngressInterface, cfg ingressDeployerConfig) *ingressDeployer {
 	return &ingressDeployer{
-		namespace: namespace,
-		ingresses: k8s.NetworkingV1().Ingresses(namespace),
+		ingresses:             ingresses,
+		ingressDeployerConfig: cfg,
 	}
 }
 
-func (d *ingressDeployer) Deploy(ctx context.Context, spec models.ApplicationSpec) error {
+func (d *ingressDeployer) String() string {
+	return "ingress-deployer"
+}
+
+func (d *ingressDeployer) Deploy(ctx context.Context, spec models.InternalSpec) error {
+	return nil
+}
+
+func (d *ingressDeployer) Delete(ctx context.Context, spec models.InternalSpec) error {
 	return nil
 }
