@@ -14,14 +14,19 @@ import (
 )
 
 type deploymentDeployer struct {
-	deployments   clientappsv1.DeploymentInterface
-	globalEnvVars map[string]string
+	deployments clientappsv1.DeploymentInterface
+	DeploymentDeployerConfig
 }
 
-func newDeploymentDeployer(deployments clientappsv1.DeploymentInterface, globalEnvVars map[string]string) *deploymentDeployer {
+type DeploymentDeployerConfig struct {
+	GlobalEnvVars map[string]string
+	PreStopDelay  int
+}
+
+func newDeploymentDeployer(deployments clientappsv1.DeploymentInterface, cfg DeploymentDeployerConfig) *deploymentDeployer {
 	return &deploymentDeployer{
-		deployments:   deployments,
-		globalEnvVars: globalEnvVars,
+		deployments:              deployments,
+		DeploymentDeployerConfig: cfg,
 	}
 }
 

@@ -19,12 +19,22 @@ const DefaultSecretsDir = "/var/run/secrets/fiaas"
 var ReEnvVar = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]+`)
 
 type Config struct {
-	ServiceType      corev1.ServiceType
-	SecretsDir       string
-	PreStopDelay     int
-	IngressSuffixes  []string
-	HostRewriteRules map[*regexp.Regexp]string
-	GlobalEnvVars    map[string]string
+	ServiceType corev1.ServiceType
+	SecretsDir  string
+
+	Ingresses   IngressDeployerConfig
+	Deployments DeploymentDeployerConfig
+}
+
+func NewConfig() Config {
+	return Config{
+		Deployments: DeploymentDeployerConfig{
+			GlobalEnvVars: make(map[string]string),
+		},
+		Ingresses: IngressDeployerConfig{
+			HostRewriteRules: make(map[*regexp.Regexp]string),
+		},
+	}
 }
 
 type ResourceDeployer interface {
@@ -36,15 +46,9 @@ type ResourceDeployer interface {
 func NewDeployer(k8s kubernetes.Interface, factory informers.SharedInformerFactory, namespace string, cfg Config) *Deployer {
 	return &Deployer{
 		deployers: []ResourceDeployer{
-			newDeploymentDeployer(k8s.AppsV1().Deployments(namespace), cfg.GlobalEnvVars),
+			newDeploymentDeployer(k8s.AppsV1().Deployments(namespace), cfg.Deployments),
 			newAutoscalerDeployer(k8s.AutoscalingV1().HorizontalPodAutoscalers(namespace)),
-			newIngressDeployer(
-				k8s.NetworkingV1().Ingresses(namespace),
-				ingressDeployerConfig{
-					suffixes:         cfg.IngressSuffixes,
-					hostRewriteRules: cfg.HostRewriteRules,
-				},
-			),
+			newIngressDeployer(k8s.NetworkingV1().Ingresses(namespace), cfg.Ingresses),
 			newServiceAccountDeployer(
 				k8s.CoreV1().ServiceAccounts(namespace),
 				factory.Core().V1().ServiceAccounts().Lister().ServiceAccounts(namespace),

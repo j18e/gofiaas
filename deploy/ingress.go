@@ -9,20 +9,20 @@ import (
 	"github.com/j18e/gofiaas/spec/core"
 )
 
-type ingressDeployerConfig struct {
-	suffixes         []string
-	hostRewriteRules map[*regexp.Regexp]string
+type IngressDeployerConfig struct {
+	Suffixes         []string
+	HostRewriteRules map[*regexp.Regexp]string
 }
 
 type ingressDeployer struct {
 	ingresses clientnetworkingv1.IngressInterface
-	ingressDeployerConfig
+	IngressDeployerConfig
 }
 
-func newIngressDeployer(ingresses clientnetworkingv1.IngressInterface, cfg ingressDeployerConfig) *ingressDeployer {
+func newIngressDeployer(ingresses clientnetworkingv1.IngressInterface, cfg IngressDeployerConfig) *ingressDeployer {
 	return &ingressDeployer{
 		ingresses:             ingresses,
-		ingressDeployerConfig: cfg,
+		IngressDeployerConfig: cfg,
 	}
 }
 

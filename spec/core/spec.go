@@ -3,10 +3,11 @@ package core
 import (
 	fiaasv1 "github.com/fiaas/fiaas-go-client/pkg/apis/fiaas.schibsted.io/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type Spec struct {
-	UID          string // used in owner references in created resources
+	UID          types.UID // used in owner references in created resources
 	Name         string
 	Image        string
 	DeploymentID string
@@ -16,18 +17,18 @@ type Spec struct {
 
 	// Fields from Application.Spec.Config
 	Version              int
-	Replicas             ReplicasConfig
+	Replicas             *Replicas
 	Ingress              []IngressHost
-	Healthchecks         HealthchecksConfig
-	Resources            corev1.ResourceRequirements
-	Metrics              MetricsConfig
-	Ports                []PortConfig
+	Healthchecks         *HealthchecksConfig
+	Resources            *corev1.ResourceRequirements
+	Metrics              *MetricsConfig
+	Ports                []Port
 	SecretsInEnvironment bool
 	AdminAccess          bool
 	// TODO Extensions
 }
 
-type ReplicasConfig struct {
+type Replicas struct {
 	Minimum                uint `json:"minimum"`
 	Maximum                uint `json:"maximum"`
 	CPUThresholdPercentage uint `json:"cpu_threshold_percentage"`
@@ -91,7 +92,7 @@ type DatadogConfig struct {
 	Tags    map[string]string `json:"tags"`
 }
 
-type PortConfig struct {
+type Port struct {
 	Protocol   string `json:"protocol"`
 	Name       string `json:"name"`
 	Port       uint   `json:"port"`

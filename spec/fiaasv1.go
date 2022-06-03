@@ -8,24 +8,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/j18e/gofiaas/spec/core"
+	v3 "github.com/j18e/gofiaas/spec/v3"
 )
 
 const LabelDeploymentID = "fiaas/deployment_id"
 
 var reContainerImage = regexp.MustCompile(`[\w-.]+/[\w-]+/[\w-]+:[\w-.]+`)
 
-// We use an interface so that reContainerImage will get initialized on startup.
-type Converter interface {
-	Convert(*fiaasv1.Application) (*core.Spec, error)
-}
-
-func NewConverter() Converter {
-	return &converter{}
-}
-
-type converter struct{}
-
-func (c *converter) Convert(app *fiaasv1.Application) (*core.Spec, error) {
+func FromFIAASV1(app *fiaasv1.Application) (*core.Spec, error) {
 	initMaps(app)
 	if app.Name != app.Spec.Application {
 		return nil, fmt.Errorf("Name does not match Spec.Name")
@@ -45,23 +35,30 @@ func (c *converter) Convert(app *fiaasv1.Application) (*core.Spec, error) {
 		Annotations: *app.Spec.AdditionalAnnotations,
 	}
 
+	requiredFields := []string{"version"}
+	for _, fld := range requiredFields {
+		if _, ok := app.Spec.Config[fld]; !ok {
+			return nil, fmt.Errorf("Spec.Config[%s]: missing required field", fld)
+		}
+	}
+
 	for key, val := range app.Spec.Config {
 		var ok bool
 		switch key {
 		case "version":
 			spec.Version, ok = val.(int)
 		case "replicas":
-			spec.Replicas, ok = val.(core.ReplicasConfig)
+			spec.Replicas, ok = val.(*core.Replicas)
 		case "ingress":
 			spec.Ingress, ok = val.([]core.IngressHost)
 		case "healthchecks":
-			spec.Healthchecks, ok = val.(core.HealthchecksConfig)
+			spec.Healthchecks, ok = val.(*core.HealthchecksConfig)
 		case "resources":
-			spec.Resources, ok = val.(corev1.ResourceRequirements)
+			spec.Resources, ok = val.(*corev1.ResourceRequirements)
 		case "metrics":
-			spec.Metrics, ok = val.(core.MetricsConfig)
+			spec.Metrics, ok = val.(*core.MetricsConfig)
 		case "ports":
-			spec.Ports, ok = val.([]core.PortConfig)
+			spec.Ports, ok = val.([]core.Port)
 		case "secrets_in_environment":
 			spec.SecretsInEnvironment, ok = val.(bool)
 		case "admin_access":
@@ -76,7 +73,21 @@ func (c *converter) Convert(app *fiaasv1.Application) (*core.Spec, error) {
 		}
 	}
 
+	validVersions := []int{v3.Version}
+	if !intInSlice(spec.Version, validVersions) {
+		return nil, fmt.Errorf("Spec.Config[version] %d: supported values are %v", spec.Version, validVersions)
+	}
+
 	return spec, nil
+}
+
+func intInSlice(i int, ix []int) bool {
+	for _, ii := range ix {
+		if i == ii {
+			return true
+		}
+	}
+	return false
 }
 
 func initMaps(app *fiaasv1.Application) {

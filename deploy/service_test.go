@@ -68,14 +68,14 @@ func Test_serviceDeployer_shouldHaveService(t *testing.T) {
 	got := sd.shouldHaveService(spec)
 	assert.Equal(t, false, got, "application without any ports should not have service")
 
-	spec.Ports = append(spec.Ports, core.PortConfig{})
+	spec.Ports = append(spec.Ports, core.Port{})
 	got = sd.shouldHaveService(spec)
 	assert.Equal(t, true, got, "application without 1+ ports should have service")
 }
 
 func Test_serviceDeployer_tcpPortAnnotations(t *testing.T) {
 	exp := map[string]string{"fiaas/tcp_port_names": "one,two"}
-	ports := []core.PortConfig{
+	ports := []core.Port{
 		{
 			Name:     "http",
 			Protocol: "http",
@@ -98,7 +98,7 @@ func Test_serviceDeployer_tcpPortAnnotations(t *testing.T) {
 }
 
 func Test_serviceDeployer_makePorts(t *testing.T) {
-	ports := []core.PortConfig{
+	ports := []core.Port{
 		Name:       "http",
 		Protocol:   "http",
 		Port:       80,
