@@ -46,7 +46,7 @@ func FromFIAASV1(app *fiaasv1.Application) (*core.Spec, error) {
 		var ok bool
 		switch key {
 		case "version":
-			spec.Version, ok = val.(int)
+			spec.Version, ok = val.(*int)
 		case "replicas":
 			spec.Replicas, ok = val.(*core.Replicas)
 		case "ingress":
@@ -60,9 +60,9 @@ func FromFIAASV1(app *fiaasv1.Application) (*core.Spec, error) {
 		case "ports":
 			spec.Ports, ok = val.([]core.Port)
 		case "secrets_in_environment":
-			spec.SecretsInEnvironment, ok = val.(bool)
+			spec.SecretsInEnvironment, ok = val.(*bool)
 		case "admin_access":
-			spec.AdminAccess, ok = val.(bool)
+			spec.AdminAccess, ok = val.(*bool)
 		case "extensions":
 		// TODO
 		default:

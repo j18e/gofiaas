@@ -1,9 +1,11 @@
 package spec
 
 import (
-	"github.com/j18e/gofiaas/spec/core"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/j18e/gofiaas/spec/core"
+	v3 "github.com/j18e/gofiaas/spec/v3"
 )
 
 var (
@@ -15,6 +17,7 @@ var (
 
 func Default() core.Spec {
 	return core.Spec{
+		Version: &v3.Version,
 		Replicas: &core.Replicas{
 			Minimum:                2,
 			Maximum:                5,

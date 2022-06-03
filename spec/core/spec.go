@@ -16,15 +16,15 @@ type Spec struct {
 	Labels      fiaasv1.AdditionalLabelsOrAnnotations
 
 	// Fields from Application.Spec.Config
-	Version              int
+	Version              *int
 	Replicas             *Replicas
 	Ingress              []IngressHost
 	Healthchecks         *HealthchecksConfig
 	Resources            *corev1.ResourceRequirements
 	Metrics              *MetricsConfig
 	Ports                []Port
-	SecretsInEnvironment bool
-	AdminAccess          bool
+	SecretsInEnvironment *bool
+	AdminAccess          *bool
 	// TODO Extensions
 }
 
