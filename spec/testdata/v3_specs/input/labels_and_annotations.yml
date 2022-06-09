@@ -1,0 +1,48 @@
+
+# Copyright 2017-2019 The FIAAS Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+version: 3
+labels:
+  deployment:
+    a: b
+    c: d
+  horizontal_pod_autoscaler:
+    e: f
+    g: h
+  ingress:
+    i: j
+    k: l
+  service:
+    m: "n"
+    o: p
+  pod:
+    q: r
+    s: u
+annotations:
+  service:
+    a: b
+    c: d
+  ingress:
+    e: f
+    g: h
+  horizontal_pod_autoscaler:
+    i: j
+    k: l
+  deployment:
+    m: "n"
+    o: p
+  pod:
+    x: y
+    z: y

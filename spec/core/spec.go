@@ -7,32 +7,48 @@ import (
 )
 
 type Spec struct {
-	UID          types.UID // used in owner references in created resources
-	Name         string
-	Image        string
-	DeploymentID string
+	UID          types.UID `json:"-"` // used in owner references in created resources
+	Name         string    `json:"-"`
+	Image        string    `json:"-"`
+	DeploymentID string    `json:"-"`
 
-	Annotations fiaasv1.AdditionalLabelsOrAnnotations
-	Labels      fiaasv1.AdditionalLabelsOrAnnotations
+	AdditionalAnnotations *fiaasv1.AdditionalLabelsOrAnnotations `json:"-"`
+	AdditionalLabels      *fiaasv1.AdditionalLabelsOrAnnotations `json:"-"`
 
-	// Fields from Application.Spec.Config
-	Version              int
-	Replicas             Replicas
-	Ingress              []IngressHost
-	Healthchecks         HealthchecksConfig
-	Resources            corev1.ResourceRequirements
-	Metrics              MetricsConfig
-	Ports                []Port
-	SecretsInEnvironment bool
-	AdminAccess          bool
-	// TODO Extensions
+	// fiaas.yml fields
+	Version              *int                         `json:"version,omitempty"`
+	Replicas             *Replicas                    `json:"replicas,omitempty"`
+	Ingress              []IngressHost                `json:"ingress,omitempty"`
+	Healthchecks         *HealthchecksConfig          `json:"healthchecks,omitempty"`
+	Resources            *corev1.ResourceRequirements `json:"resources,omitempty"`
+	Metrics              *MetricsConfig               `json:"metrics,omitempty"`
+	Ports                []Port                       `json:"ports,omitempty"`
+	SecretsInEnvironment *bool                        `json:"secrets_in_environment,omitempty"`
+	AdminAccess          *bool                        `json:"admin_access,omitempty"`
+	Labels               *LabelsOrAnnotations         `json:"labels,omitempty"`
+	Annotations          *LabelsOrAnnotations         `json:"annotations,omitempty"`
+}
+
+type LabelsOrAnnotations struct {
+	// Global                  map[string]string `json:"global,omitempty"`
+	Deployment              map[string]string `json:"deployment,omitempty"`
+	HorizontalPodAutoscaler map[string]string `json:"horizontal_pod_autoscaler,omitempty"`
+	Ingress                 map[string]string `json:"ingress,omitempty"`
+	Service                 map[string]string `json:"service,omitempty"`
+	ServiceAccount          map[string]string `json:"service_account,omitempty"`
+	Pod                     map[string]string `json:"pod,omitempty"`
+	// Status                  map[string]string `json:"status,omitempty"`
 }
 
 type Replicas struct {
-	Minimum                uint `json:"minimum"`
-	Maximum                uint `json:"maximum"`
-	CPUThresholdPercentage uint `json:"cpu_threshold_percentage"`
+	Minimum                int  `json:"minimum"`
+	Maximum                int  `json:"maximum"`
+	CPUThresholdPercentage int  `json:"cpu_threshold_percentage"`
 	Singleton              bool `json:"singleton"`
+}
+
+func (r *Replicas) AutoscalingEnabled() bool {
+	return r.Minimum != r.Maximum
 }
 
 type IngressHost struct {
@@ -46,20 +62,43 @@ type IngressPath struct {
 	Port string `json:"port"`
 }
 
+type MetricsConfig struct {
+	Prometheus *PrometheusConfig `json:"prometheus,omitempty"`
+	Datadog    *DatadogConfig    `json:"datadog,omitempty"`
+}
+
+type PrometheusConfig struct {
+	Enabled bool   `json:"enabled"`
+	Port    string `json:"port"`
+	Path    string `json:"path"`
+}
+
+type DatadogConfig struct {
+	Enabled bool              `json:"enabled"`
+	Tags    map[string]string `json:"tags,omitempty"`
+}
+
+type Port struct {
+	Protocol   string `json:"protocol"`
+	Name       string `json:"name"`
+	Port       int    `json:"port"`
+	TargetPort int    `json:"target_port"`
+}
+
 type HealthchecksConfig struct {
-	Liveness  Healthcheck `json:"liveness"`
-	Readiness Healthcheck `json:"readiness"`
+	Liveness  *Healthcheck `json:"liveness"`
+	Readiness *Healthcheck `json:"readiness"`
 }
 
 type Healthcheck struct {
-	Execute             HealthcheckExecute `json:"execute"`
-	HTTP                HealthcheckHTTP    `json:"http"`
-	TCP                 HealthcheckTCP     `json:"tcp"`
-	InitialDelaySeconds uint               `json:"initial_delay_seconds"`
-	PeriodSeconds       uint               `json:"period_secconds"`
-	SuccessThreshold    uint               `json:"success_threshold"`
-	FailureThreshold    uint               `json:"failure_threshold"`
-	TimeoutSeconds      uint               `json:"timeout_seconds"`
+	Execute             *HealthcheckExecute `json:"execute,omitempty"`
+	HTTP                *HealthcheckHTTP    `json:"http,omitempty"`
+	TCP                 *HealthcheckTCP     `json:"tcp,omitempty"`
+	InitialDelaySeconds int                 `json:"initial_delay_seconds"`
+	PeriodSeconds       int                 `json:"period_secconds"`
+	SuccessThreshold    int                 `json:"success_threshold"`
+	FailureThreshold    int                 `json:"failure_threshold"`
+	TimeoutSeconds      int                 `json:"timeout_seconds"`
 }
 
 type HealthcheckExecute struct {
@@ -73,28 +112,5 @@ type HealthcheckHTTP struct {
 }
 
 type HealthcheckTCP struct {
-	Port uint `json:"port"`
-}
-
-type MetricsConfig struct {
-	Prometheus PrometheusConfig `json:"prometheus"`
-	Datadog    DatadogConfig    `json:"datadog"`
-}
-
-type PrometheusConfig struct {
-	Enabled bool   `json:"enabled"`
-	Port    string `json:"port"`
-	Path    string `json:"path"`
-}
-
-type DatadogConfig struct {
-	Enabled bool              `json:"enabled"`
-	Tags    map[string]string `json:"tags"`
-}
-
-type Port struct {
-	Protocol   string `json:"protocol"`
-	Name       string `json:"name"`
-	Port       uint   `json:"port"`
-	TargetPort uint   `json:"target_port"`
+	Port string `json:"port"`
 }

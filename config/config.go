@@ -7,9 +7,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/j18e/gofiaas/deploy"
-	"github.com/j18e/gofiaas/web"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/j18e/gofiaas/deploy"
+	"github.com/j18e/gofiaas/log"
+	"github.com/j18e/gofiaas/web"
 )
 
 const (
@@ -49,17 +51,18 @@ func ParseFlags() (*FlagSet, error) {
 	if fs.environment == "" {
 		return nil, errors.New("flag environment required but not specified")
 	}
-	if *serviceType == "" {
-		return nil, errors.New("flag service-type required but not specified")
-	}
-	switch corev1.ServiceType(*serviceType) {
+	st := corev1.ServiceType(*serviceType)
+	switch st {
+	case "":
+		fs.Deployer.ServiceType = corev1.ServiceTypeClusterIP
 	case corev1.ServiceTypeClusterIP,
 		corev1.ServiceTypeNodePort,
 		corev1.ServiceTypeLoadBalancer:
+		fs.Deployer.ServiceType = st
 	default:
 		return nil, fmt.Errorf("unrecognized service-type %s", *serviceType)
 	}
-	fs.Deployer.ServiceType = corev1.ServiceType(*serviceType)
+	log.Logger.Infof("deployer: using service-type %s", st)
 	return fs, nil
 }
 
