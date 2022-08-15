@@ -3,22 +3,29 @@ package spec
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"regexp"
 
 	fiaasv1 "github.com/fiaas/fiaas-go-client/pkg/apis/fiaas.schibsted.io/v1"
 	"github.com/j18e/gofiaas/spec/core"
+	v3 "github.com/j18e/gofiaas/spec/v3"
 	"gopkg.in/yaml.v2"
 )
 
-type Factory struct {
-	defaults *core.Spec
+const LabelDeploymentID = "fiaas/deployment_id"
+
+var reContainerImage = regexp.MustCompile(`[\w-.]+/[\w-]+/[\w-]+:[\w-.]+`)
+
+type Factory interface {
+	Transform(fiaasv1.Application) (*core.Spec, error)
 }
 
-func NewFactory() (*Factory, error) {
-	const file = `defaults.yml`
-	bs, err := os.ReadFile(file)
-	if err != nil {
-		return nil, err
+func NewFactory(version int) (Factory, error) {
+	var bs []byte
+	switch version {
+	case v3.Version:
+		bs = v3.Defaults
+	default:
+		return nil, fmt.Errorf("version %d unrecognized", version)
 	}
 	var spec core.Spec
 	if err := yaml.Unmarshal(bs, &spec); err != nil {
@@ -28,10 +35,30 @@ func NewFactory() (*Factory, error) {
 	if err := validate(&spec); err != nil {
 		return nil, err
 	}
-	return &Factory{defaults: &spec}, nil
+	return &specFactory{defaults: &spec}, nil
 }
 
-func (f *Factory) Transform(app fiaasv1.Application) (*core.Spec, error) {
+type specFactory struct {
+	defaults *core.Spec
+}
+
+func (f *specFactory) Transform(app fiaasv1.Application) (*core.Spec, error) {
+	if app.Name != app.Spec.Application {
+		return nil, fmt.Errorf("Name does not match Spec.Name")
+	}
+	if app.Labels == nil || app.Labels[LabelDeploymentID] == "" {
+		return nil, fmt.Errorf("Labels[%s] is missing", LabelDeploymentID)
+	}
+	if app.UID == "" {
+		return nil, fmt.Errorf("UID is missing")
+	}
+	if !reContainerImage.MatchString(app.Spec.Image) {
+		return nil, fmt.Errorf("Spec.image does not match regex %s", reContainerImage)
+	}
+	if app.Spec.Config == nil {
+		return nil, fmt.Errorf("missing Spec.Config")
+	}
+
 	spec, err := convert(app.Spec.Config)
 	if err != nil {
 		return nil, err
@@ -40,7 +67,16 @@ func (f *Factory) Transform(app fiaasv1.Application) (*core.Spec, error) {
 	if err := validate(spec); err != nil {
 		return nil, err
 	}
-	// TODO merge additional global labels into spec
+
+	spec.Name = app.Name
+	spec.DeploymentID = app.Labels[LabelDeploymentID]
+	spec.UID = app.UID
+	spec.Image = app.Spec.Image
+
+	for k, v := range app.Spec.AdditionalLabels.Global {
+		spec.AddGlobalLabel(k, v)
+	}
+	// TODO what to do with app.Spec.AdditionalAnnotations.Status
 	return spec, nil
 }
 
@@ -100,8 +136,10 @@ func convert(config fiaasv1.Config) (*core.Spec, error) {
 	if spec.Version == nil {
 		return nil, fmt.Errorf("version field required but missing")
 	}
-	if *spec.Version != Version {
-		return nil, fmt.Errorf("expected version %d, got %d", Version, *spec.Version)
+	switch *spec.Version {
+	case v3.Version:
+	default:
+		return nil, fmt.Errorf("invalid version %d", *spec.Version)
 	}
 	return &spec, nil
 }

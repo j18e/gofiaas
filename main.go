@@ -15,6 +15,7 @@ import (
 
 	"github.com/j18e/gofiaas/config"
 	"github.com/j18e/gofiaas/log"
+	"github.com/j18e/gofiaas/spec"
 	v3 "github.com/j18e/gofiaas/spec/v3"
 )
 
@@ -47,7 +48,7 @@ func run() error {
 	}
 	fmt.Println(string(bs))
 
-	factory, err := v3.NewFactory()
+	factory, err := spec.NewFactory(v3.Version)
 	if err != nil {
 		return err
 	}

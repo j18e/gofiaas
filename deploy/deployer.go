@@ -81,7 +81,7 @@ func (d *Deployer) Delete(ctx context.Context, spec core.Spec) {
 func (d *Deployer) makeLabels(spec core.Spec) map[string]string {
 	return map[string]string{
 		"app":                 spec.Name,
-		"fiaas/version":       strconv.Itoa(spec.Version),
+		"fiaas/version":       strconv.Itoa(*spec.Version),
 		"fiaas/deployment_id": spec.DeploymentID,
 	}
 }

@@ -29,6 +29,15 @@ type Spec struct {
 	Annotations          *LabelsOrAnnotations         `json:"annotations,omitempty"`
 }
 
+func (s *Spec) AddGlobalLabel(key, val string) {
+	s.Labels.Deployment[key] = val
+	s.Labels.HorizontalPodAutoscaler[key] = val
+	s.Labels.Ingress[key] = val
+	s.Labels.Service[key] = val
+	s.Labels.ServiceAccount[key] = val
+	s.Labels.Pod[key] = val
+}
+
 type LabelsOrAnnotations struct {
 	// Global                  map[string]string `json:"global,omitempty"`
 	Deployment              map[string]string `json:"deployment,omitempty"`
@@ -49,17 +58,6 @@ type Replicas struct {
 
 func (r *Replicas) AutoscalingEnabled() bool {
 	return r.Minimum != r.Maximum
-}
-
-type IngressHost struct {
-	Host        string            `json:"host"`
-	Paths       []IngressPath     `json:"paths"`
-	Annotations map[string]string `json:"annotations"`
-}
-
-type IngressPath struct {
-	Path string `json:"path"`
-	Port string `json:"port"`
 }
 
 type MetricsConfig struct {
